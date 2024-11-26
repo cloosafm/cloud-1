@@ -20,7 +20,7 @@ resource "google_compute_instance" "my_instance" {
   zone         = "us-central1-a"
   allow_stopping_for_update = true
 
-  //  tags = ["web"]
+  tags = ["dev"]
 
   boot_disk {
     initialize_params {
@@ -32,8 +32,9 @@ resource "google_compute_instance" "my_instance" {
   //  scratch_disk {}
 
   network_interface {
+// faut voir lequel on utilise
     network = "default"
-
+  //    network = google_compute_network.vpc_network.name
     access_config {
       // Ephemeral IP
     }
