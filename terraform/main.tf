@@ -15,12 +15,14 @@ provider "google" {
 }
 
 resource "google_compute_instance" "my_instance" {
-  name         = "terraform-instance"
-  machine_type = "f1-micro"
-  zone         = "us-central1-a"
-  allow_stopping_for_update = true
+  name         = var.instance_info.name
+  machine_type = var.instance_info.machine_type
+  zone         = var.instance_info.zone
+  allow_stopping_for_update = var.instance_info.allow_stopping_for_update
 
-  tags = ["dev"]
+  tags = ["dev"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
+  // should probably be in variables file, can be used as a map
+  // see also the use of labels
 
   boot_disk {
     initialize_params {
@@ -33,19 +35,20 @@ resource "google_compute_instance" "my_instance" {
     subnetwork = google_compute_subnetwork.terraform_subnet.self_link
     access_config { 
       // needed even if empty
+    }
   }
 
 }
 
 resource "google_compute_network" "terraform_network"{
-    name = "terraform-network"
-    auto_create_subnetworks = false
+    name = var.tf_network_info.name
+    auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
 }
 
 resource "google_compute_subnetwork" "terraform_subnet" {
-    name = "terraform-subnetwork"
-    ip_cidr_range = "10.20.0.0/16"
-    region = "us-central1"
+    name = var.tf_subnet_info.name
+    ip_cidr_range = var.tf_subnet_info.ip_cidr_range
+    region = var.tf_subnet_info.region
     network = google_compute_network.terraform_network.id
 
 
