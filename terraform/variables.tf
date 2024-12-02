@@ -1,16 +1,15 @@
 variable "project" {}
 variable "credentials_file" {}
 
-variable "ssh-keys" {
-  description = "SSH keys for the project"
+variable "ssh_user" {
+  description = "The SSH username"
   type        = string
 }
 
-# variable "ssh-file" {
-#   description = "SSH public key file"
-#   type        = string
-  
-# }
+variable "ssh_key_path" {
+  description = "Path to the SSH public key"
+  type        = string
+}
 
 variable "region" {
     default = "us-west1"

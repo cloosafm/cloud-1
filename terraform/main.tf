@@ -20,7 +20,7 @@ resource "google_compute_instance" "my_instance" {
   zone         = var.instance_info.zone
   allow_stopping_for_update = var.instance_info.allow_stopping_for_update
 
-  tags = ["dev"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
+  tags = ["allow-ssh"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
   // should probably be in variables file, can be used as a map
   // see also the use of labels
 
@@ -39,7 +39,7 @@ resource "google_compute_instance" "my_instance" {
   }
 
   metadata = {
-    ssh-keys = "acloos:${file("~/.ssh/id_rsa.pub")}"
+    ssh-keys = "${var.ssh_user}:${file(var.ssh_key_path)}"
   }
 }
 
@@ -53,8 +53,30 @@ resource "google_compute_subnetwork" "terraform_subnet" {
     ip_cidr_range = var.tf_subnet_info.ip_cidr_range
     region = var.tf_subnet_info.region
     network = google_compute_network.terraform_network.id
+}
 
 
+resource "google_compute_firewall" "allow-ssh" {
+  name    = "test-firewall"
+  network = google_compute_network.terraform_network.name
+
+  allow {
+    protocol = "icmp"
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_tags = ["web"]
+  source_ranges = ["0.0.0.0/0"]
+  target_tags = ["allow-ssh"] 
+}
+
+
+output "ip" {
+  value = google_compute_instance.my_instance.network_interface.0.network_ip
 }
 
 
