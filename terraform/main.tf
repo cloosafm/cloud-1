@@ -38,6 +38,9 @@ resource "google_compute_instance" "my_instance" {
     }
   }
 
+  metadata = {
+    ssh-keys = "acloos:${file("~/.ssh/id_rsa.pub")}"
+  }
 }
 
 resource "google_compute_network" "terraform_network"{

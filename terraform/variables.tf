@@ -1,12 +1,23 @@
 variable "project" {}
 variable "credentials_file" {}
 
+variable "ssh-keys" {
+  description = "SSH keys for the project"
+  type        = string
+}
+
+# variable "ssh-file" {
+#   description = "SSH public key file"
+#   type        = string
+  
+# }
+
 variable "region" {
-    default = "us-central1"
+    default = "us-west1"
 }
 
 variable "zone" {
-    default = "us-central1-c"
+    default = "us-west1-c"
 }
 
 variable "os-image" {
@@ -22,8 +33,8 @@ variable "instance_info" {
     })
     default = {
       name = "terraform-instance"
-      machine_type = "f1-micro"
-      zone = "us-central1-a"
+      machine_type = "e2-micro"
+      zone = "us-west1-a"
       allow_stopping_for_update = true
     }
 }
@@ -48,6 +59,6 @@ variable "tf_subnet_info" {
     default = {
       name = "terraform-subnetwork"
       ip_cidr_range = "10.20.0.0/16"
-      region = "us-central1"
+      region = "us-west1"
     }
 }
