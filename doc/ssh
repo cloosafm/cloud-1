@@ -1,0 +1,1 @@
+gcloud compute ssh --project="terraform-on-gcp-443214" --zone="us-west1-a" "terraform-instance"
