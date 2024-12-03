@@ -1,5 +1,10 @@
 ---
 # tasks file for packet_upgrade
+
+- name: Ensure we have reached the packet_upgrade tasks
+  debug:
+    msg: "Starting packet_upgrade tasks"
+
 - name: Update apt cache
   apt:
     update_cache: yes

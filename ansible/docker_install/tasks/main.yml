@@ -1,0 +1,37 @@
+---
+# tasks file for docker_install
+
+- name: Ensure we have reached the docker_install tasks
+  debug:
+    msg: "Starting docker_install tasks"
+
+- name: Copy Docker installation script to the target machine
+  copy:
+    src: ../file/install_docker.sh
+    dest: /tmp/install_docker.sh
+    mode: '0755'
+
+- name: Run Docker installation script
+  command: /tmp/install_docker.sh
+- name: Update apt cache after adding Docker repository
+  apt:
+    update_cache: yes
+
+- name: Install Docker CE and CLI
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: latest
+
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Verify Docker installation
+  command: docker --version

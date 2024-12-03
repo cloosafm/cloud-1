@@ -3,5 +3,5 @@
   become: yes
   roles:
     - packet_upgrade
-    - docker_install
-    - docker_config
+    # - docker_install
+    # - docker_config

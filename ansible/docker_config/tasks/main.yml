@@ -1,5 +1,10 @@
 ---
 # tasks file for docker_config
+
+- name: Ensure we have reached the docker_config tasks
+  debug:
+    msg: "Starting docker_config tasks"
+
 - name: Start and enable Docker service
   service:
     name: docker
