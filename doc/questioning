@@ -1,0 +1,3 @@
+GCP: can we chose different "availability zones" for different VMs ? (like Azure)
+with several VMs :  if there's a failure on-site, our website needs to still be available while GCP repairs affected VM
+also, having several VMs help with future CI/CD
