@@ -39,7 +39,22 @@ resource "google_compute_instance" "my_instance" {
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_key_path)}"
+    ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
+  }
+
+  provisioner "remote-exec" {
+    inline = ["echo 'Hello World'"]
+
+    connection {
+        host        = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
+        type        = "ssh"
+        user        = "${var.ssh_user}"
+        private_key = "${file("${var.ssh_priv_key_path}")}"
+    }
+  }
+
+  provisioner "local-exec" {  
+    command = "ansible-playbook -i '${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip},' --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml"
   }
 }
 
@@ -54,7 +69,6 @@ resource "google_compute_subnetwork" "terraform_subnet" {
     region = var.tf_subnet_info.region
     network = google_compute_network.terraform_network.id
 }
-
 
 resource "google_compute_firewall" "allow-ssh" {
   name    = "test-firewall"
@@ -73,10 +87,4 @@ resource "google_compute_firewall" "allow-ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags = ["allow-ssh"] 
 }
-
-
-output "ip" {
-  value = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
-}
-
 

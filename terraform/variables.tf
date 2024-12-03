@@ -6,8 +6,13 @@ variable "ssh_user" {
   type        = string
 }
 
-variable "ssh_key_path" {
+variable "ssh_pub_key_path" {
   description = "Path to the SSH public key"
+  type        = string
+}
+
+variable "ssh_priv_key_path" {
+  description = "Path to the SSH private key"
   type        = string
 }
 
