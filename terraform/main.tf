@@ -42,6 +42,7 @@ resource "google_compute_instance" "my_instance" {
     ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
 
+
   provisioner "remote-exec" {
     inline = [
       "echo '\\033[1;32mWelcome to Cloud-1\\033[0m'",
@@ -51,25 +52,20 @@ resource "google_compute_instance" "my_instance" {
       "echo 'Instance IP: ${self.network_interface.0.access_config.0.nat_ip}'"
     ]
 
+
     connection {
-      host        = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
-      type        = "ssh"
-      user        = var.ssh_user
-      private_key = file("${var.ssh_priv_key_path}")
+        host        = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
+        type        = "ssh"
+        user        = "${var.ssh_user}"
+        private_key = "${file("${var.ssh_priv_key_path}")}"
     }
   }
-}
-resource "null_resource" "ssh_key_management" {
-  provisioner "local-exec" {
-    command = <<EOT
-    ssh-keygen -R ${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip} &&
-    ssh-keyscan -H ${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip} >> ~/.ssh/known_hosts &&
-    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i '${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip},' --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml
-    EOT
-  }
 
-  depends_on = [google_compute_instance.my_instance]
+  provisioner "local-exec" {  
+    command = "ansible-playbook -i '${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip},' --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml"
+  }
 }
+
 
 resource "google_compute_network" "terraform_network" {
   name                    = var.tf_network_info.name
