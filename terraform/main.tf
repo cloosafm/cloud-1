@@ -87,4 +87,3 @@ resource "google_compute_firewall" "allow-ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags = ["allow-ssh"] 
 }
-
