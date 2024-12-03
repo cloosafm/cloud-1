@@ -1,0 +1,7 @@
+- name: Install and configure Docker on GCP instance
+  hosts: all
+  become: yes
+  roles:
+    - packet_upgrade
+    - docker_install
+    - docker_config

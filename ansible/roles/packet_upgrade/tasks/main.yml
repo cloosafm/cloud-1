@@ -1,0 +1,18 @@
+---
+# tasks file for packet_upgrade
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Install required dependencies for apps
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Create Keyring
+  command: install -m 0755 -d /etc/apt/keyrings

@@ -1,0 +1,13 @@
+---
+# tasks file for docker_config
+- name: Start and enable Docker service
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Add the user to the docker group
+  ansible.builtin.shell: |
+    usermod -aG docker {{ ansible_user }}
+  args:
+    warn: false
