@@ -4,3 +4,8 @@ The website, its database, as well as the webserver mut be in different containe
 
 ## Techs used
 We will be using Ansible and Terraform for the deployment, and Docker/docker-compose for the containerization.
+
+## Variables
+we have included some dummy files that you can just populate with your own values. you need to have the following :
+- terraform/terraform.tvars
+- ansible/docker_config/vars/main.yml

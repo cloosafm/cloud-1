@@ -7,12 +7,13 @@
 
 - name: Copy Docker installation script to the target machine
   copy:
-    src: ../file/install_docker.sh
-    dest: /tmp/install_docker.sh
+    src: ../files/docker_script.sh
+    dest: /tmp/docker_script.sh
     mode: '0755'
 
 - name: Run Docker installation script
-  command: /tmp/install_docker.sh
+  command: /tmp/docker_script.sh
+
 - name: Update apt cache after adding Docker repository
   apt:
     update_cache: yes
@@ -22,16 +23,20 @@
     name:
       - docker-ce
       - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
     state: latest
 
-- name: Start and enable Docker service
-  service:
-    name: docker
-    state: started
-    enabled: yes
+- name: Install Docker plugins
+  apt:
+    name:
+      - containerd.io
+      - docker-buildx-plugin
+    state: latest
+
+- name: Install Docker compose
+  apt:
+    name:
+      - docker-compose-plugin
+    state: latest
 
 - name: Verify Docker installation
   command: docker --version
