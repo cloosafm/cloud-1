@@ -73,10 +73,3 @@ resource "google_compute_firewall" "allow-ssh" {
   source_ranges = ["0.0.0.0/0"]
   target_tags = ["allow-ssh"] 
 }
-
-
-output "ip" {
-  value = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
-}
-
-
