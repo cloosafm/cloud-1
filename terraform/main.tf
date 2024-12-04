@@ -28,8 +28,8 @@ resource "google_compute_instance" "my_instance" {
   }
 
   network_interface {
-    network    = google_compute_network.terraform_network.self_link
-    subnetwork = google_compute_subnetwork.terraform_subnet.self_link
+    network = "default"
+
     access_config {
       // needed even if empty
     }
@@ -38,7 +38,6 @@ resource "google_compute_instance" "my_instance" {
   metadata = {
     ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
-
 
   provisioner "remote-exec" {
     inline = [
@@ -63,33 +62,45 @@ resource "google_compute_instance" "my_instance" {
   }
 }
 
-
-resource "google_compute_network" "terraform_network" {
-  name                    = var.tf_network_info.name
-  auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
-}
-
-resource "google_compute_subnetwork" "terraform_subnet" {
-  name          = var.tf_subnet_info.name
-  ip_cidr_range = var.tf_subnet_info.ip_cidr_range
-  region        = var.tf_subnet_info.region
-  network       = google_compute_network.terraform_network.id
-}
-
-resource "google_compute_firewall" "allow-ssh" {
-  name    = var.tf_firewall_info.name
-  network = google_compute_network.terraform_network.name
-
-  allow {
-    protocol = "icmp"
-  }
+resource "google_compute_firewall" "allow_http" {
+  name    = "allow-http"
+  network = "default"
 
   allow {
     protocol = "tcp"
-    ports    = ["22"]
+    ports    = ["80"]
   }
 
-  source_tags   = var.tf_firewall_info.source_tags
-  source_ranges = var.tf_firewall_info.source_ranges
-  target_tags   = var.tf_firewall_info.target_tags
+  source_ranges = ["0.0.0.0/0"] # Permet l'accès depuis n'importe où
+  target_tags   = ["http-server"]
 }
+
+# resource "google_compute_network" "terraform_network" {
+#   name                    = var.tf_network_info.name
+#   auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
+# }
+
+# resource "google_compute_subnetwork" "terraform_subnet" {
+#   name          = var.tf_subnet_info.name
+#   ip_cidr_range = var.tf_subnet_info.ip_cidr_range
+#   region        = var.tf_subnet_info.region
+#   network       = google_compute_network.terraform_network.id
+# }
+
+# resource "google_compute_firewall" "allow-ssh" {
+#   name    = var.tf_firewall_info.name
+#   network = google_compute_network.terraform_network.name
+
+#   allow {
+#     protocol = "icmp"
+#   }
+
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["22"]
+#   }
+
+#   source_tags   = var.tf_firewall_info.source_tags
+#   source_ranges = var.tf_firewall_info.source_ranges
+#   target_tags   = var.tf_firewall_info.target_tags
+# }

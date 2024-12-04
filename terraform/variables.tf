@@ -3,7 +3,7 @@ variable "credentials_file" {}
 
 variable "tags_info" {
   description = "Tags for the instance"
-  default        = ["allow-ssh"]
+  default        = ["allow-ssh", "http-server"]
 }
 
 variable "ssh_user" {
@@ -48,36 +48,36 @@ variable "instance_info" {
   }
 }
 
-variable "tf_network_info" {
-  type = object({
-    name                    = string
-    auto_create_subnetworks = bool
-  })
-  default = {
-    name                    = "terraform-network"
-    auto_create_subnetworks = false
-  }
-}
+# variable "tf_network_info" {
+#   type = object({
+#     name                    = string
+#     auto_create_subnetworks = bool
+#   })
+#   default = {
+#     name                    = "default"
+#     auto_create_subnetworks = false
+#   }
+# }
 
-variable "tf_subnet_info" {
-  type = object({
-    name          = string
-    ip_cidr_range = string
-    region        = string
-  })
-  default = {
-    name          = "terraform-subnetwork"
-    ip_cidr_range = "10.20.0.0/16"
-    region        = "us-west1"
-  }
-}
+# variable "tf_subnet_info" {
+#   type = object({
+#     name          = string
+#     ip_cidr_range = string
+#     region        = string
+#   })
+#   default = {
+#     name          = "terraform-subnetwork"
+#     ip_cidr_range = "10.20.0.0/16"
+#     region        = "us-west1"
+#   }
+# }
 
-variable "tf_firewall_info" {
-  description = "Information for the firewall rule"
-  type = object({
-    name          = string
-    source_tags   = list(string)
-    source_ranges = list(string)
-    target_tags   = list(string)
-  })
-}
+# variable "tf_firewall_info" {
+#   description = "Information for the firewall rule"
+#   type = object({
+#     name          = string
+#     source_tags   = list(string)
+#     source_ranges = list(string)
+#     target_tags   = list(string)
+#   })
+# }

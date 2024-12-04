@@ -1,0 +1,24 @@
+---
+# tasks file for inception_setup
+- name: Copy inception files into the instance
+  copy:
+    src: srcs/
+    dest: /home/{{ ansible_user }}/inception
+
+- name: Create data folder
+  file:
+    path: /home/{{ ansible_user }}/data
+    state: directory
+    mode: '0755'
+
+- name: Create database folder
+  file:
+    path: /home/{{ ansible_user }}/data/database
+    state: directory
+    mode: '0755'
+
+- name: Create public folder
+  file:
+    path: /home/{{ ansible_user }}/data/public
+    state: directory
+    mode: '0755'

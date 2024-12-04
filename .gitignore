@@ -1,6 +1,8 @@
 inventory.yml
 credentials.json
 ansible/docker_config/vars/main.yml
+.env
+wp-config.php
 
 # Local .terraform directories
 **/.terraform/*

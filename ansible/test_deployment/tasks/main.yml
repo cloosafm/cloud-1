@@ -1,0 +1,32 @@
+---
+# tasks file for deploy_website
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    force_apt_get: yes
+
+- name: Install firewalld
+  apt:
+    name:
+      - firewalld
+
+- name: Stop firewalld
+  service: 
+    name: firewalld 
+    state: stopped
+
+- name: Install the apache2 package
+  apt:
+    name:
+      - apache2
+
+- name: Start the apache2 service
+  service: 
+    name: apache2 
+    state: started
+    
+- name: Configure Cat App
+  template:
+    src: index.j2
+    dest: /var/www/html/index.html
