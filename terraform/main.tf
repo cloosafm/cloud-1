@@ -20,10 +20,11 @@ resource "google_compute_instance" "my_instance" {
   zone                      = var.instance_info.zone
   allow_stopping_for_update = var.instance_info.allow_stopping_for_update
 
-  tags = ["allow-ssh"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
-  // should probably be in variables file, can be used as a map
-  // see also the use of labels
+  # tags = ["allow-ssh"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
+  # // should probably be in variables file, can be used as a map
+  # // see also the use of labels
 
+  tags = var.tags_info
   boot_disk {
     initialize_params {
       image = var.os-image

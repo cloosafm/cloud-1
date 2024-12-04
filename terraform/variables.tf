@@ -1,6 +1,11 @@
 variable "project" {}
 variable "credentials_file" {}
 
+variable "tags_info" {
+  description = "Tags for the instance"
+  default        = ["allow-ssh"]
+}
+
 variable "ssh_user" {
   description = "The SSH username"
   type        = string
@@ -66,3 +71,13 @@ variable "tf_subnet_info" {
     region        = "us-west1"
   }
 }
+
+# variable "tf_firewall_info" {
+#   description = "Information for the firewall rule"
+#   type = object({
+#     name          = string
+#     source_tags   = list(string)
+#     source_ranges = list(string)
+#     target_tags   = list(string)
+#   })
+# }
