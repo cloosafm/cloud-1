@@ -1,5 +1,6 @@
 - name: Install and configure Docker on GCP instance
   hosts: all
+  # hosts: transcendence42.rocks
   become: yes
   roles:
     - packet_upgrade

@@ -1,5 +1,12 @@
-project     = 
-credentials_file = 
-ssh_user = 
-ssh_pub_key_path = 
-ssh_priv_key_path = 
+project     = you-project-name
+credentials_file = your-creds-file
+ssh_user = your-username
+ssh_pub_key_path = path-to-public-key
+ssh_priv_key_path = path-to-private-key
+
+tf_firewall_info = {
+  name          = block-name
+  source_tags   = your-source-tags
+  source_ranges = your-ranges
+  target_tags   = your-target-tags
+}

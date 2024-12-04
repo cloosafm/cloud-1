@@ -93,21 +93,3 @@ resource "google_compute_firewall" "allow-ssh" {
   source_ranges = var.tf_firewall_info.source_ranges
   target_tags   = var.tf_firewall_info.target_tags
 }
-
-# resource "google_compute_firewall" "allow-ssh" {
-#   name    = "test-firewall"
-#   network = google_compute_network.terraform_network.name
-
-#   allow {
-#     protocol = "icmp"
-#   }
-
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["22"]
-#   }
-
-#   source_tags   = ["web"]
-#   source_ranges = ["0.0.0.0/0"]
-#   target_tags   = ["allow-ssh"]
-# }
