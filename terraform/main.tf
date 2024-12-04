@@ -20,10 +20,6 @@ resource "google_compute_instance" "my_instance" {
   zone                      = var.instance_info.zone
   allow_stopping_for_update = var.instance_info.allow_stopping_for_update
 
-  # tags = ["allow-ssh"] // optional, can be used to determine if this is instance is for dev, test, prod, etc
-  # // should probably be in variables file, can be used as a map
-  # // see also the use of labels
-
   tags = var.tags_info
   boot_disk {
     initialize_params {
@@ -81,7 +77,7 @@ resource "google_compute_subnetwork" "terraform_subnet" {
 }
 
 resource "google_compute_firewall" "allow-ssh" {
-  name    = "test-firewall"
+  name    = var.tf_firewall_info.name
   network = google_compute_network.terraform_network.name
 
   allow {
@@ -93,7 +89,25 @@ resource "google_compute_firewall" "allow-ssh" {
     ports    = ["22"]
   }
 
-  source_tags   = ["web"]
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["allow-ssh"]
+  source_tags   = var.tf_firewall_info.source_tags
+  source_ranges = var.tf_firewall_info.source_ranges
+  target_tags   = var.tf_firewall_info.target_tags
 }
+
+# resource "google_compute_firewall" "allow-ssh" {
+#   name    = "test-firewall"
+#   network = google_compute_network.terraform_network.name
+
+#   allow {
+#     protocol = "icmp"
+#   }
+
+#   allow {
+#     protocol = "tcp"
+#     ports    = ["22"]
+#   }
+
+#   source_tags   = ["web"]
+#   source_ranges = ["0.0.0.0/0"]
+#   target_tags   = ["allow-ssh"]
+# }

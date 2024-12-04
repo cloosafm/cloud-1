@@ -72,12 +72,12 @@ variable "tf_subnet_info" {
   }
 }
 
-# variable "tf_firewall_info" {
-#   description = "Information for the firewall rule"
-#   type = object({
-#     name          = string
-#     source_tags   = list(string)
-#     source_ranges = list(string)
-#     target_tags   = list(string)
-#   })
-# }
+variable "tf_firewall_info" {
+  description = "Information for the firewall rule"
+  type = object({
+    name          = string
+    source_tags   = list(string)
+    source_ranges = list(string)
+    target_tags   = list(string)
+  })
+}
