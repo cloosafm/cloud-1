@@ -75,6 +75,19 @@ resource "google_compute_firewall" "allow_http" {
   target_tags   = ["http-server"]
 }
 
+resource "google_compute_firewall" "allow_https" {
+  name    = "allow-https"
+  network = "default"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"] # Permet l'accès depuis n'importe où
+  target_tags   = ["http-server"]
+}
+
 # resource "google_compute_network" "terraform_network" {
 #   name                    = var.tf_network_info.name
 #   auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
