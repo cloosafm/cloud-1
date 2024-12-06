@@ -35,19 +35,22 @@ resource "google_compute_instance_template" "my_template" {
     }
   }
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   metadata = {
     ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
-  # metadata = {
-  #   ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
-  #   startup-script = <<-EOT
-  #     #!/bin/bash
-  #     echo '\\033[1;32mWelcome to Cloud-1\\033[0m'
-  #     echo 'Instance is up and running'
-  #     echo 'Current user: $(whoami)'
-  #     echo 'Current directory: $(pwd)'
-  #   EOT
-  # }
+
+  metadata_startup_script = <<-EOT
+    #!/bin/bash
+    echo -e '\\033[1;32mWelcome to Cloud-1\\033[0m'
+    echo 'Instance is up and running'
+    echo 'Current user: $(whoami)'
+    echo 'Current directory: $(pwd)'
+    echo 'Instance IP: $(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")'
+  EOT
 
 }
 
@@ -55,7 +58,7 @@ resource "google_compute_instance_template" "my_template" {
 resource "google_compute_instance_group_manager" "my_instance_group" {
   name               = "my-instance-group"
   base_instance_name = "my-instance"
-  target_size        = 2
+  target_size        = var.target_size # Number of instances in the group
 
   version {
   instance_template  = google_compute_instance_template.my_template.self_link
@@ -65,17 +68,28 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
     port = 80
   }
 
-
   provisioner "local-exec" {
-    # command = "ansible-playbook -i '${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip},' --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml"
     command = <<EOT
-      # Retrieve instance IPs
-      IPS=$(gcloud compute instances list --filter="name ~ 'my-instance-group'" --format="get(networkInterfaces[0].accessConfigs[0].natIP)")
-      
-      # Run Ansible Playbook
-      ansible-playbook -i "$IPS," --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml
+      echo "Fetching IPs of instances in the Managed Instance Group..."
+      gcloud compute instances list \
+        --filter="name~'my-instance'" \
+        --format="get(networkInterfaces[0].accessConfigs[0].natIP)" > instance_ip_list
+      echo "Instance IPs saved to instance_ip_list"
+
+      echo "Waiting for instances to become available..."
+      for ip in $(cat instance_ip_list); do
+        while ! nc -z -w 5 $ip 22; do
+          echo "Waiting for SSH on $ip to respond..."
+          sleep 5
+        done
+        echo "SSH on $ip is available"
+      done
+
+      echo "Running Ansible playbook on the fetched IPs..."
+      ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i instance_ip_list --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
     EOT
   }
+
 }
 
 # Network

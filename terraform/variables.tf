@@ -6,6 +6,10 @@ variable "tags_info" {
   default     = ["allow-ssh", "http-server"]
 }
 
+variable "target_size" {
+  description = "The number of instances in the group"
+  default     = 2
+}
 variable "ssh_user" {
   description = "The SSH username"
   type        = string
@@ -41,7 +45,7 @@ variable "instance_info" {
     allow_stopping_for_update = bool
   })
   default = {
-    name                      = "terraform-instance-acloos"
+    name                      = "terraform-instance"
     machine_type              = "e2-micro"
     zone                      = "us-west1-a"
     allow_stopping_for_update = true

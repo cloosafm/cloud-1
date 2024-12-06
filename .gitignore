@@ -4,6 +4,7 @@ ansible/docker_config/vars/main.yml
 .env
 wp-config.php
 tf_*
+instance_ip_list
 
 # Local .terraform directories
 **/.terraform/*
