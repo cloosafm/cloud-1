@@ -41,7 +41,7 @@ variable "instance_info" {
     allow_stopping_for_update = bool
   })
   default = {
-    name                      = "terraform-instance"
+    name                      = "terraform-instance-acloos"
     machine_type              = "e2-micro"
     zone                      = "us-west1-a"
     allow_stopping_for_update = true

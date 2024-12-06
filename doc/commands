@@ -1,0 +1,14 @@
+gcloud compute ssh --project="terraform-on-gcp-443214" --zone="us-west1-a" "terraform-instance"
+
+
+deletion:
+gcloud compute instance-groups managed delete instance-group-1 --region=us-west1 --project=PROJECT_ID
+gcloud compute instance-groups managed delete instance-group-1 --zone=us-west1-a --project=PROJECT_ID
+gcloud compute instance-groups list-instances instance-group-1 --region=us-west1 --project=PROJECT_ID
+gcloud compute instances delete INSTANCE_NAME --zone=us-west1-a --project=PROJECT_ID
+
+
+get terraform output:
+gcloud beta resource-config bulk-export --project=PROJECT_ID --resource-format=terraform
+
+
