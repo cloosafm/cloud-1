@@ -14,106 +14,111 @@ provider "google" {
   zone        = var.zone
 }
 
-resource "google_compute_instance" "my_instance" {
-  name                      = var.instance_info.name
-  machine_type              = var.instance_info.machine_type
-  zone                      = var.instance_info.zone
-  allow_stopping_for_update = var.instance_info.allow_stopping_for_update
+# Instance Template
+resource "google_compute_instance_template" "my_template" {
+  name         = "my-instance-template"
+  machine_type = var.instance_info.machine_type
 
   tags = var.tags_info
-  boot_disk {
-    initialize_params {
-      image = var.os-image
-    }
+
+  disk {
+    auto_delete = true
+    boot        = true
+    source_image = var.os-image
+    # initialize_params {
+    #   image = var.os-image
+    # }
   }
 
   network_interface {
-    network = "default"
-
+    network    = google_compute_network.terraform_network.self_link
+    subnetwork = google_compute_subnetwork.terraform_subnet.self_link
     access_config {
       // needed even if empty
     }
   }
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
+    ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
+    startup-script = <<-EOT
+      #!/bin/bash
+      echo "Starting Ansible Playbook on VM"
+      apt-get update && apt-get install -y ansible
+      echo '${var.ansible_playbook}' > /tmp/playbook.yml
+      ansible-playbook /tmp/playbook.yml
+    EOT
+  }
+}
+
+# Managed Instance Group
+resource "google_compute_instance_group_manager" "my_instance_group" {
+  name               = "my-instance-group"
+  base_instance_name = "my-instance"
+
+  target_size        = 2
+
+  version {
+  instance_template  = google_compute_instance_template.my_template.self_link
+  }
+  named_port {
+    name = "http"
+    port = 80
+  }
+}
+
+# Network
+resource "google_compute_network" "terraform_network" {
+  name                    = var.tf_network_info.name
+  auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
+}
+
+resource "google_compute_subnetwork" "terraform_subnet" {
+  name          = var.tf_subnet_info.name
+  ip_cidr_range = var.tf_subnet_info.ip_cidr_range
+  region        = var.tf_subnet_info.region
+  network       = google_compute_network.terraform_network.id
+}
+
+# Firewall Rules
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.terraform_network.name
+
+  allow {
+    protocol = "icmp"
   }
 
-  provisioner "remote-exec" {
-    inline = [
-      "echo '\\033[1;32mWelcome to Cloud-1\\033[0m'",
-      "echo 'Instance is up and running'",
-      "bash -c 'echo Current user: $(whoami)'",
-      "bash -c 'echo Current directory: $(pwd)'",
-      "echo 'Instance IP: ${self.network_interface.0.access_config.0.nat_ip}'"
-    ]
-
-
-    connection {
-        host        = google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip
-        type        = "ssh"
-        user        = "${var.ssh_user}"
-        private_key = "${file("${var.ssh_priv_key_path}")}"
-    }
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
   }
 
-  provisioner "local-exec" {  
-    command = "ansible-playbook -i '${google_compute_instance.my_instance.network_interface.0.access_config.0.nat_ip},' --private-key ${var.ssh_priv_key_path} ../ansible/playbook.yml"
-  }
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["allow-ssh"]
 }
 
 resource "google_compute_firewall" "allow_http" {
   name    = "allow-http"
-  network = "default"
+  network = google_compute_network.terraform_network.name
 
   allow {
     protocol = "tcp"
     ports    = ["80"]
   }
 
-  source_ranges = ["0.0.0.0/0"] # Permet l'accès depuis n'importe où
+  source_ranges = ["0.0.0.0/0"]
   target_tags   = ["http-server"]
 }
 
 resource "google_compute_firewall" "allow_https" {
   name    = "allow-https"
-  network = "default"
+  network = google_compute_network.terraform_network.name
 
   allow {
     protocol = "tcp"
     ports    = ["443"]
   }
 
-  source_ranges = ["0.0.0.0/0"] # Permet l'accès depuis n'importe où
-  target_tags   = ["http-server"]
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["https-server"]
 }
-
-# resource "google_compute_network" "terraform_network" {
-#   name                    = var.tf_network_info.name
-#   auto_create_subnetworks = var.tf_network_info.auto_create_subnetworks
-# }
-
-# resource "google_compute_subnetwork" "terraform_subnet" {
-#   name          = var.tf_subnet_info.name
-#   ip_cidr_range = var.tf_subnet_info.ip_cidr_range
-#   region        = var.tf_subnet_info.region
-#   network       = google_compute_network.terraform_network.id
-# }
-
-# resource "google_compute_firewall" "allow-ssh" {
-#   name    = var.tf_firewall_info.name
-#   network = google_compute_network.terraform_network.name
-
-#   allow {
-#     protocol = "icmp"
-#   }
-
-#   allow {
-#     protocol = "tcp"
-#     ports    = ["22"]
-#   }
-
-#   source_tags   = var.tf_firewall_info.source_tags
-#   source_ranges = var.tf_firewall_info.source_ranges
-#   target_tags   = var.tf_firewall_info.target_tags
-# }
