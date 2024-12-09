@@ -3,8 +3,8 @@
   # hosts: transcendence42.rocks
   become: yes
   roles:
-      - test_deployment
-    # - packet_upgrade
-    # - docker_install
-    # - docker_config
-    # - inception_setup
+    # - test_deployment
+    - packet_upgrade
+    - docker_install
+    - docker_config
+    - inception_setup

@@ -43,7 +43,7 @@ resource "google_compute_instance_template" "my_template" {
     ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
 
-  metadata_startup_script = <<-EOT
+  metadata_startup_script = <<EOT
     #!/bin/bash
     echo -e '\\033[1;32mWelcome to Cloud-1\\033[0m'
     echo 'Instance is up and running'
@@ -76,7 +76,22 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
         --format="get(networkInterfaces[0].accessConfigs[0].natIP)" > instance_ip_list
       echo "Instance IPs saved to instance_ip_list"
 
-      echo "Waiting for instances to become available..."
+	  IP_LIST="instance_ip_list"
+
+	  INVENTORY_FILE="../ansible/inventory.yml"
+	  echo "---" > $INVENTORY_FILE
+	  echo "all:" >> $INVENTORY_FILE
+	  echo "  hosts:" >> $INVENTORY_FILE
+
+	  i=1
+	  while IFS= read -r ip; do
+	  echo "    vm$i:" >> $INVENTORY_FILE
+	  echo "      ansible_host: $ip" >> $INVENTORY_FILE
+	  i=$((i + 1))
+	  done < "$IP_LIST"
+	  echo "Inventaire généré dans $INVENTORY_FILE"
+
+	  echo "Waiting for instances to become available..."
       for ip in $(cat instance_ip_list); do
         while ! nc -z -w 5 $ip 22; do
           echo "Waiting for SSH on $ip to respond..."
@@ -86,7 +101,7 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
       done
 
       echo "Running Ansible playbook on the fetched IPs..."
-      ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i instance_ip_list --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
+      ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i  "../ansible/inventory.yml" -f ${var.target_size} --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
     EOT
   }
 

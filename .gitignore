@@ -1,10 +1,12 @@
 inventory.yml
 credentials.json
 ansible/docker_config/vars/main.yml
+ansible/inception_setup/vars/main.yml
 .env
 wp-config.php
 tf_*
 instance_ip_list
+env.j2
 
 # Local .terraform directories
 **/.terraform/*

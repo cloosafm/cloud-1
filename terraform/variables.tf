@@ -3,7 +3,7 @@ variable "credentials_file" {}
 variable "ansible_playbook" {}
 variable "tags_info" {
   description = "Tags for the instance"
-  default     = ["allow-ssh", "http-server"]
+  default     = ["allow-ssh", "http-server", "https-server"]
 }
 
 variable "target_size" {
@@ -75,8 +75,6 @@ variable "tf_subnet_info" {
     region        = "us-west1"
   }
 }
-
-
 
 # variable "tf_firewall_info" {
 #   description = "Information for the firewall rule"
