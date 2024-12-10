@@ -1,4 +1,0 @@
----
-# vars file for docker_config
-
-ansible_user :

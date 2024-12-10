@@ -1,0 +1,4 @@
+---
+# vars file for docker_config / inception_setup
+
+ansible_user : <username>

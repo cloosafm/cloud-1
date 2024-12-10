@@ -9,14 +9,6 @@ SQL_ROOT_PASSWORD       =
 SQL_USER_LOGIN          = 
 SQL_USER_PASSWORD       = 
 
-# NGINX ########################################
-
-NGINX_BASE              = 
-NGINX_DOCKER_HOST       = 
-NGINX_URL_HOST          = 
-NGINX_URL_SCHEME        = 
-NGINX_USER				= 
-
 # WORDPRESS ####################################
 
 WDP_ADMIN_EMAIL         = 
@@ -26,9 +18,16 @@ WDP_DOCKER_HOST         =
 WDP_DOCKER_PORT         = 
 WDP_TITLE               = 
 WDP_THEME               = 
-WDP_URL_HOST            = 
 WDP_URL_SCHEME          = 
+WDP_URL_HOST            = {{ vm_ip }}
 WDP_USER_EMAIL          = 
 WDP_USER_LOGIN          = 
 WDP_USER_PASSWORD       = 
 
+# NGINX ########################################
+
+NGINX_BASE              = 
+NGINX_DOCKER_HOST       = 
+NGINX_URL_SCHEME        = 
+NGINX_USER              = 
+NGINX_URL_HOST          = {{ vm_ip }}
