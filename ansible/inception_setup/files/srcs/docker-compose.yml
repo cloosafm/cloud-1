@@ -42,14 +42,14 @@ volumes:
   database:
     driver: local
     driver_opts:
-      device: ${HOME}/data/database
+      device: /data/database
       type: none
       o: bind
 
   public:
     driver: local
     driver_opts:
-      device: ${HOME}/data/public
+      device: /data/public
       type: none
       o: bind
 

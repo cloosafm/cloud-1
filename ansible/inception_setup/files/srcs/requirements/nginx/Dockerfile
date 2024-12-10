@@ -10,9 +10,9 @@ ARG         CONTAINER_CFG="etc/nginx/nginx.conf"
 EXPOSE      443
 
 # INSTALLATION #################################
-
-RUN         apt -y update && apt -y install ${CONTAINER_PKG}
-RUN         apt clean && rm -rf /var/lib/apt/lists/*
+		
+RUN         DEBIAN_FRONTEND=noninteractive apt -y update && DEBIAN_FRONTEND=noninteractive apt -y install ${CONTAINER_PKG}
+RUN         DEBIAN_FRONTEND=noninteractive apt clean && rm -rf /var/lib/apt/lists/*
 
 RUN         mkdir -p /build
 COPY        con[f]/ /build/conf/

@@ -43,14 +43,14 @@ resource "google_compute_instance_template" "my_template" {
     ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
 
-  metadata_startup_script = <<EOT
-    #!/bin/bash
-    echo -e '\\033[1;32mWelcome to Cloud-1\\033[0m'
-    echo 'Instance is up and running'
-    echo 'Current user: $(whoami)'
-    echo 'Current directory: $(pwd)'
-    echo 'Instance IP: $(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")'
-  EOT
+#   metadata_startup_script = <<EOT
+#     #!/bin/bash
+#     echo -e '\\033[1;32mWelcome to Cloud-1\\033[0m'
+#     echo 'Instance is up and running'
+#     echo 'Current user: $(whoami)'
+#     echo 'Current directory: $(pwd)'
+#     echo 'Instance IP: $(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")'
+#   EOT
 
 }
 
@@ -66,6 +66,10 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
   named_port {
     name = "http"
     port = 80
+  }
+  named_port {
+	name = "https"
+	port = 443
   }
 
   provisioner "local-exec" {
@@ -102,7 +106,8 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
 
       echo "Running Ansible playbook on the fetched IPs..."
       ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i  "../ansible/inventory.yml" -f ${var.target_size} --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
-    EOT
+	  gcloud compute instances list --format="table(name, networkInterfaces[0].accessConfigs[0].natIP)"
+	EOT
   }
 
 }
@@ -138,28 +143,72 @@ resource "google_compute_firewall" "allow_ssh" {
   target_tags   = ["allow-ssh"]
 }
 
-resource "google_compute_firewall" "allow_http" {
-  name    = "allow-http"
+resource "google_compute_firewall" "allow_web_traffic" {
+  name    = "allow-web-traffic"
   network = google_compute_network.terraform_network.name
 
   allow {
     protocol = "tcp"
-    ports    = ["80"]
+    ports    = ["80","443"]
   }
 
   source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["http-server"]
+  target_tags   = ["website"]
 }
 
-resource "google_compute_firewall" "allow_https" {
-  name    = "allow-https"
-  network = google_compute_network.terraform_network.name
 
-  allow {
-    protocol = "tcp"
-    ports    = ["443"]
-  }
+# #create disk to be shared
+# resource "google_compute_disk" "mariadb_disk" {
+#   name  = "mariadb-disk"
+#   type  = "pd-standard"
+#   size  = 10
+#   zone  = var.zone
+# }
 
-  source_ranges = ["0.0.0.0/0"]
-  target_tags   = ["https-server"]
-}
+# resource "google_compute_instance" "mariadb_instance" {
+#    name         = "mariadb-instance"
+#   machine_type = "e2-micro" 
+#   zone         = var.zone
+
+#   boot_disk {
+#     initialize_params {
+#       image = var.os-image
+#     }
+#   }
+
+#   network_interface {
+#     network    = google_compute_network.terraform_network.self_link
+#     subnetwork = google_compute_subnetwork.terraform_subnet.self_link
+#     access_config {
+#       // This block is required to assign an external IP
+#     }
+#   }
+
+#   attached_disk {
+#     source = google_compute_disk.mariadb_disk.id
+#     mode   = "READ_WRITE"
+#   }
+
+#   metadata_startup_script = <<-EOT
+#     #!/bin/bash
+#     sudo mkfs.ext4 -F /dev/disk/by-id/google-mariadb-disk
+#     sudo mkdir -p /mnt/disks/mariadb
+#     sudo mount -o discard,defaults /dev/disk/by-id/google-mariadb-disk /mnt/disks/mariadb
+#     sudo mount -o nolock ${google_filestore_instance.mariadb_filestore.networks[0].ip_addresses[0]}:/mariadb_share /mnt/disks/mariadb
+#     sudo chmod a+w /mnt/disks/mariadb
+#   EOT
+# }
+
+# #google cloud filestore to manage shared disk
+# resource "google_filestore_instance" "mariadb_filestore" {
+#   name       = "mariadb-filestore"
+#   tier       = "STANDARD"
+#   file_shares {
+#     name       = "mariadb_share"
+#     capacity_gb = 1024
+#   }
+#   networks {
+#     network = google_compute_network.terraform_network.name
+#     modes   = ["MODE_IPV4"]
+#   }
+# }

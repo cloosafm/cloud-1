@@ -1,6 +1,2 @@
 # ---
 # # vars file for packet_upgrade
-# - name: Copy inception files into the instance
-#   copy:
-#     src: ./inception_setup/files/src
-#     dest: /home/{{ ansible_user }}/inception

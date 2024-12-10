@@ -3,29 +3,29 @@
 - name: Copy inception files into the instance
   copy:
     src: srcs/
-    dest: /home/{{ ansible_user }}/inception
+    dest: /inception
 
 - name: Create data folder
   file:
-    path: /home/{{ ansible_user }}/data
+    path: /data
     state: directory
     mode: '0755'
 
 - name: Create database folder
   file:
-    path: /home/{{ ansible_user }}/data/database
+    path: /data/database
     state: directory
     mode: '0755'
 
 - name: Create public folder
   file:
-    path: /home/{{ ansible_user }}/data/public
+    path: /data/public
     state: directory
 
 - name: Generate .env file for each VM
   template:
     src: env.j2
-    dest: "/home/{{ ansible_user }}/inception/.env"
+    dest: "/inception/.env"
     mode: '0644'
   vars:
     vm_ip: "{{ ansible_host }}"

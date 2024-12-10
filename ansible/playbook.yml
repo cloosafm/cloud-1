@@ -8,3 +8,4 @@
     - docker_install
     - docker_config
     - inception_setup
+    - deploy_website

@@ -4,5 +4,9 @@
   debug:
     msg: "Starting deploy_website tasks"
 
+- name: Deploy wordpress site
+  command: docker compose -p inception -f /inception/docker-compose.yml up --build -d
 
-  
+- name: Confirm deployment
+  debug:
+    msg: "Done"

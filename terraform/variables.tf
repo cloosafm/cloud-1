@@ -3,7 +3,7 @@ variable "credentials_file" {}
 variable "ansible_playbook" {}
 variable "tags_info" {
   description = "Tags for the instance"
-  default     = ["allow-ssh", "http-server", "https-server"]
+  default     = ["allow-ssh", "website"]
 }
 
 variable "target_size" {

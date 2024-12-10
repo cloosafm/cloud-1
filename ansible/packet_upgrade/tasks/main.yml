@@ -17,6 +17,7 @@
       - ca-certificates
       - curl
       - software-properties-common
+      # - nfs-common
     state: present
 
 - name: Create Keyring
