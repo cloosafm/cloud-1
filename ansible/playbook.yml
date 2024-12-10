@@ -1,4 +1,4 @@
-- name: Install and configure Docker on GCP instance
+- name: Install, Configure Docker on GCP instance and deploy Wordpress Website
   hosts: all
   # hosts: transcendence42.rocks
   become: yes
