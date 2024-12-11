@@ -7,6 +7,8 @@ wp-config.php
 tf_*
 instance_ip_list
 env.j2
+.vscode
+
 
 # Local .terraform directories
 **/.terraform/*

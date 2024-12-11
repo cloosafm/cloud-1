@@ -1,11 +1,11 @@
-gcloud compute ssh --project="terraform-on-gcp-443214" --zone="us-west1-a" "terraform-instance"
+gcloud compute ssh --project=<project-name> --zone=<zone-name> <instance-name>
 
 
 deletion:
-gcloud compute instance-groups managed delete instance-group-1 --region=us-west1 --project=PROJECT_ID
-gcloud compute instance-groups managed delete instance-group-1 --zone=us-west1-a --project=PROJECT_ID
-gcloud compute instance-groups list-instances instance-group-1 --region=us-west1 --project=PROJECT_ID
-gcloud compute instances delete INSTANCE_NAME --zone=us-west1-a --project=PROJECT_ID
+gcloud compute instance-groups managed delete <instance-group-name> --region=<region-name> --project=PROJECT_ID
+gcloud compute instance-groups managed delete <instance-group-name> --zone=<zone-name> --project=PROJECT_ID
+gcloud compute instance-groups list-instances <instance-group-name> --region=<region-name> --project=PROJECT_ID
+gcloud compute instances delete INSTANCE_NAME --zone=<zone-name> --project=PROJECT_ID
 
 
 get terraform output:

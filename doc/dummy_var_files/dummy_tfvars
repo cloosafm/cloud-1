@@ -3,3 +3,10 @@ credentials_file = your-creds-file
 ssh_user = your-username
 ssh_pub_key_path = path-to-public-key
 ssh_priv_key_path = path-to-private-key
+
+
+tf_firewall_info = {
+  source_ranges = source-range
+}
+
+ansible_playbook  = path-to-playbook

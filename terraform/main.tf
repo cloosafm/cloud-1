@@ -16,15 +16,15 @@ provider "google" {
 
 # Instance Template
 resource "google_compute_instance_template" "my_template" {
-  name         = "my-instance-template"
-  machine_type = var.instance_info.machine_type
+  name         = var.template_info.name
+  machine_type = var.template_info.machine_type
 
-  tags = var.tags_info
+  tags = var.template_info.tags
 
   disk {
-    auto_delete = true
-    boot        = true
-    source_image = var.os-image
+    auto_delete = var.template_info.disk_auto_delete
+    boot        = var.template_info.disk_boot
+    source_image = var.template_info.os_image
   }
 
   network_interface {
@@ -43,22 +43,13 @@ resource "google_compute_instance_template" "my_template" {
     ssh-keys       = "${var.ssh_user}:${file(var.ssh_pub_key_path)}"
   }
 
-#   metadata_startup_script = <<EOT
-#     #!/bin/bash
-#     echo -e '\\033[1;32mWelcome to Cloud-1\\033[0m'
-#     echo 'Instance is up and running'
-#     echo 'Current user: $(whoami)'
-#     echo 'Current directory: $(pwd)'
-#     echo 'Instance IP: $(curl -s http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip -H "Metadata-Flavor: Google")'
-#   EOT
-
 }
 
 # Managed Instance Group
 resource "google_compute_instance_group_manager" "my_instance_group" {
-  name               = "my-instance-group"
-  base_instance_name = "my-instance"
-  target_size        = var.target_size # Number of instances in the group
+  name               = var.mig_info.name
+  base_instance_name = var.mig_info.base_instance_name
+  target_size        = var.mig_info.target_size # Number of instances in the group
 
   version {
   instance_template  = google_compute_instance_template.my_template.self_link
@@ -68,8 +59,8 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
     port = 80
   }
   named_port {
-	name = "https"
-	port = 443
+  name = "https"
+  port = 443
   }
 
   provisioner "local-exec" {
@@ -80,22 +71,22 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
         --format="get(networkInterfaces[0].accessConfigs[0].natIP)" > instance_ip_list
       echo "Instance IPs saved to instance_ip_list"
 
-	  IP_LIST="instance_ip_list"
+      IP_LIST="instance_ip_list"
 
-	  INVENTORY_FILE="../ansible/inventory.yml"
-	  echo "---" > $INVENTORY_FILE
-	  echo "all:" >> $INVENTORY_FILE
-	  echo "  hosts:" >> $INVENTORY_FILE
+      INVENTORY_FILE="../ansible/inventory.yml"
+      echo "---" > $INVENTORY_FILE
+      echo "all:" >> $INVENTORY_FILE
+      echo "  hosts:" >> $INVENTORY_FILE
 
-	  i=1
-	  while IFS= read -r ip; do
-	  echo "    vm$i:" >> $INVENTORY_FILE
-	  echo "      ansible_host: $ip" >> $INVENTORY_FILE
-	  i=$((i + 1))
-	  done < "$IP_LIST"
-	  echo "Inventaire généré dans $INVENTORY_FILE"
+      i=1
+      while IFS= read -r ip; do
+        echo "    vm$i:" >> $INVENTORY_FILE
+        echo "      ansible_host: $ip" >> $INVENTORY_FILE
+        i=$((i + 1))
+        done < "$IP_LIST"
+      echo "Inventaire généré dans $INVENTORY_FILE"
 
-	  echo "Waiting for instances to become available..."
+      echo "Waiting for instances to become available..."
       for ip in $(cat instance_ip_list); do
         while ! nc -z -w 5 $ip 22; do
           echo "Waiting for SSH on $ip to respond..."
@@ -105,12 +96,13 @@ resource "google_compute_instance_group_manager" "my_instance_group" {
       done
 
       echo "Running Ansible playbook on the fetched IPs..."
-      ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i  "../ansible/inventory.yml" -f ${var.target_size} --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
-	  gcloud compute instances list --format="table(name, networkInterfaces[0].accessConfigs[0].natIP)"
-	EOT
+      ANSIBLE_HOST_KEY_CHECKING=False  ansible-playbook -i  $INVENTORY_FILE -f ${var.mig_info.target_size} --private-key ${var.ssh_priv_key_path} ${var.ansible_playbook}
+      gcloud compute instances list --format="table(name, networkInterfaces[0].accessConfigs[0].natIP)"
+    EOT
   }
 
 }
+
 
 # Network
 resource "google_compute_network" "terraform_network" {
@@ -139,7 +131,7 @@ resource "google_compute_firewall" "allow_ssh" {
     ports    = ["22"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.tf_firewall_info.source_ranges
   target_tags   = ["allow-ssh"]
 }
 
@@ -152,9 +144,10 @@ resource "google_compute_firewall" "allow_web_traffic" {
     ports    = ["80","443"]
   }
 
-  source_ranges = ["0.0.0.0/0"]
+  source_ranges = var.tf_firewall_info.source_ranges
   target_tags   = ["website"]
 }
+
 
 
 # #create disk to be shared

@@ -1,15 +1,5 @@
-variable "project" {}
-variable "credentials_file" {}
 variable "ansible_playbook" {}
-variable "tags_info" {
-  description = "Tags for the instance"
-  default     = ["allow-ssh", "website"]
-}
 
-variable "target_size" {
-  description = "The number of instances in the group"
-  default     = 2
-}
 variable "ssh_user" {
   description = "The SSH username"
   type        = string
@@ -25,30 +15,51 @@ variable "ssh_priv_key_path" {
   type        = string
 }
 
+
+# provider information
+variable "project" {}
+variable "credentials_file" {}
 variable "region" {
   default = "us-west1"
 }
-
 variable "zone" {
   default = "us-west1-c"
 }
 
-variable "os-image" {
-  default = "ubuntu-os-cloud/ubuntu-2204-lts"
-}
 
-variable "instance_info" {
+
+# template information
+variable "template_info" {
   type = object({
     name                      = string
     machine_type              = string
-    zone                      = string
-    allow_stopping_for_update = bool
+    tags                      = list(string)
+    disk_auto_delete          = bool
+    disk_boot                 = bool
+    os_image                  = string
   })
   default = {
-    name                      = "terraform-instance"
+    name                      = "terraform-template"
     machine_type              = "e2-micro"
-    zone                      = "us-west1-a"
-    allow_stopping_for_update = true
+    tags                      = ["allow-ssh", "website"]
+    disk_auto_delete          = true
+    disk_boot                 = true
+    os_image                  = "ubuntu-os-cloud/ubuntu-2204-lts"
+  }
+}
+
+
+# Managed Instance Group information
+variable "mig_info" {
+  type = object({
+    name                      = string
+    base_instance_name        = string
+    target_size               = number # Number of instances in the group
+  })
+  default = {
+    name                      = "my-instance-group"
+    base_instance_name        = "my-instance"
+    target_size               = 2
   }
 }
 
@@ -76,12 +87,11 @@ variable "tf_subnet_info" {
   }
 }
 
-# variable "tf_firewall_info" {
-#   description = "Information for the firewall rule"
-#   type = object({
-#     name          = string
-#     source_tags   = list(string)
-#     source_ranges = list(string)
-#     target_tags   = list(string)
-#   })
-# }
+
+
+variable "tf_firewall_info" {
+  description = "Information for the firewall rule"
+  type = object({
+    source_ranges = list(string)
+  })
+}
